@@ -1,0 +1,8 @@
+#!/bin/bash
+# Display all active IPv4 IPs
+
+ip -4 addr | grep inet | awk '{print $2}' | cut -d '/' -f1
+# ip -4 addr: Displays IPv4 addresses using the ip command.
+# grep inet: Filters lines containing "inet" (IPv4 addresses).
+# awk '{print $2}': Extracts the second column (the IP address) from the output.
+# cut -d '/' -f1: Removes the subnet information by splitting at '/' and keeping the first field.
