@@ -4,8 +4,7 @@
 # Check if an argument is provided
 if [ "$#" -eq 0 ]; then
     echo "Usage: $0 {IP_ADDRESS}"
-else
-
+    exit 1
 fi
 
 # Extract the IP address from the argument
