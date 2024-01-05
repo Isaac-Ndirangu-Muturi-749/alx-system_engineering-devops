@@ -2,9 +2,8 @@
 # Bash script to ping an IP address
 
 # Check if an argument is provided
-if [ "$#" -ne 1 ]; then
+if [ "$#" -eq 0 ]; then
     echo "Usage: $0 {IP_ADDRESS}"
-    exit 1
 fi
 
 # Extract the IP address from the argument
