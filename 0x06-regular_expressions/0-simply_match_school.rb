@@ -17,4 +17,4 @@ regex = /School/
 matches = input_string.scan(regex)
 
 # Display the matches
-puts matches.join('$')
+puts matches.join
