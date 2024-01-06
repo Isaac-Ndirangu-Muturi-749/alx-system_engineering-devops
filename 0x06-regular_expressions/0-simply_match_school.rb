@@ -2,9 +2,10 @@
 
 # Define the regular expression
 regex = /School/
+first_argument = ARGV[0]
 
 # Check for matches from the first command line argument
-matches = ARGV[0].scan(regex)
+matches = first_argument.scan(regex)
 
 # Display the matches
 puts matches.join
