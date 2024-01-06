@@ -1,20 +1,20 @@
 #!/usr/bin/env ruby
+# Ruby script to match the word "School" using regular expressions
 
-# Check if there is exactly one command-line argument
-if ARGV.length != 1
-    puts "Usage: #{$PROGRAM_NAME} <string>"
-    exit 1
-  end
+# Check if an argument is provided
+if ARGV.empty?
+  puts "Usage: #{$PROGRAM_NAME} <input_string>"
+  exit 1
+end
 
-  # Extract the argument
-  input_string = ARGV[0]
+# Get the input string from the command line argument
+input_string = ARGV.join(' ')
 
-  # Define the regular expression pattern
-  pattern = /School/
+# Define the regular expression
+regex = /School/
 
-  # Check if the input string matches the pattern
-  if input_string =~ pattern
-    puts "#{input_string}$"
-  else
-    puts "$"
-  end
+# Check for matches in the input string
+matches = input_string.scan(regex)
+
+# Display the matches
+puts matches.join('$')
