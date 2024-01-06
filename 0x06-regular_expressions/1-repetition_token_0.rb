@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 # Define the regular expression
-regex = /hbt{2,5}n/
+regex = /hb?tn/
 first_argument = ARGV[0]
 
 # Check for matches from the first command line argument
