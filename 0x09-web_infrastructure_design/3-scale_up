@@ -1,0 +1,66 @@
+**Readme - Application Server vs Web Server**
+
+**Overview:**
+This infrastructure is designed to illustrate the distinction between application servers and web servers. It includes one server, one load balancer (HAProxy), and separates components such as the web server, application server, and database onto their dedicated servers.
+
+**Components:**
+
+1. **Server 1 (Generic Server):**
+   - Represents a generic server that can be utilized for various purposes.
+   - Hosts different components of the web application stack.
+
+2. **Load Balancer (HAProxy):**
+   - Configured as a cluster with another load balancer.
+   - Distributes incoming traffic among the various components to enhance scalability and reliability.
+   - Splits requests between the web server and application server.
+
+3. **Web Server:**
+   - Dedicated server responsible for handling HTTP requests.
+   - Manages static content, serves as a reverse proxy, and forwards dynamic requests to the application server.
+   - Enhances security by separating concerns and improving scalability.
+
+4. **Application Server:**
+   - Dedicated server responsible for executing dynamic code and processing application logic.
+   - Handles dynamic requests forwarded by the web server.
+   - Separates application processing from serving static content.
+
+5. **Database:**
+   - Represents the database component of the web application.
+   - Hosts and manages the application's data.
+   - Separates data storage from application and presentation layers.
+
+**Specifics:**
+
+- **Server 1 (Generic Server):**
+  - The generic server is used to host various components of the web application stack, promoting flexibility.
+
+- **Load Balancer (HAProxy):**
+  - The load balancer is configured as a cluster with another load balancer for redundancy.
+  - Distributes incoming traffic evenly among the web server and application server, preventing overload on a single server.
+
+- **Web Server:**
+  - Dedicated to handling HTTP requests, serving static content, and acting as a reverse proxy.
+  - Improves security by isolating static content serving from dynamic application logic processing.
+  - Enables scalability by distributing traffic between multiple application servers.
+
+- **Application Server:**
+  - Executes dynamic code, processes application logic, and handles dynamic requests.
+  - Separates application processing from static content serving, ensuring a modular and scalable architecture.
+
+- **Database:**
+  - Represents the backend data storage for the web application.
+  - Isolated from the web and application servers to enhance security.
+  - Separates the data layer from the application and presentation layers for maintainability.
+
+**Why These Additions:**
+
+- **Load Balancer (HAProxy):**
+  - Added to distribute incoming traffic, preventing overload on a single server and enhancing overall system reliability.
+  - Configured as a cluster for high availability, ensuring continuous operation even if one load balancer fails.
+
+- **Web Server and Application Server Separation:**
+  - Separating web and application servers improves scalability, security, and maintainability.
+  - Web server focuses on serving static content and handling HTTP requests, while the application server executes dynamic code and processes application logic.
+
+**Conclusion:**
+This infrastructure demonstrates the separation of concerns between web servers and application servers, utilizing a load balancer to distribute traffic for scalability and reliability. The design emphasizes modularity, security, and maintainability in a web application stack.
