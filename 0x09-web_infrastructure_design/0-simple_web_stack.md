@@ -1,4 +1,4 @@
-https://github.com/Isaac-Ndirangu-Muturi-749/alx-system_engineering-devops/blob/main/0x09-web_infrastructure_design/0-simple_web_stack.png
+![](https://github.com/Isaac-Ndirangu-Muturi-749/alx-system_engineering-devops/blob/main/0x09-web_infrastructure_design/0-simple_web_stack.png)
 
 
 
