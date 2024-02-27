@@ -1,16 +1,33 @@
 #!/usr/bin/env bash
-# Configure your Nginx server to have a custom 404 page that contains the string Ceci n'est pas une page.
-
-# Define the content of the custom 404 page
-NOT_FOUND_PAGE="<html>\n<head><title>404 Not Found</title></head>\n<body><h1>404 Not Found</h1><p>Ceci n'est pas une page</p></body>\n</html>"
+# Sets up a new 404 error page and configures Nginx
 
 # Install Nginx
-apt-get update -y
-apt-get install nginx -y
+sudo apt-get update
+sudo apt-get install -y nginx
 
-# Configure Nginx to use the custom 404 page
-echo -e "$NOT_FOUND_PAGE" > /usr/share/nginx/html/404.html
-sed -i '/^}/i error_page 404 /404.html;' /etc/nginx/sites-available/default
+# Set up the HTML files
+echo "Hello World!" | sudo tee /var/www/html/index.html >/dev/null
+echo "Ceci n'est pas une page" | sudo tee /var/www/html/404.html >/dev/null
+
+# Configure Nginx
+sudo tee /etc/nginx/sites-available/default >/dev/null <<EOF
+server {
+   listen 80 default_server;
+   listen [::]:80 default_server;
+
+   root /var/www/html;
+   index index.html;
+
+   location /redirect_me {
+      return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+   }
+
+   error_page 404 /404.html;
+   location = /404.html {
+      internal;
+   }
+}
+EOF
 
 # Restart Nginx
-service nginx restart
+sudo service nginx restart
