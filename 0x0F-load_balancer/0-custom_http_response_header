@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+# Update package repositories
+apt-get -y update
+
+# Install Nginx
+apt-get -y install nginx
+
+# Define file paths
+NGINX_DEFAULT_CONF="/etc/nginx/sites-available/default"
+NGINX_CONF="/etc/nginx/nginx.conf"
+INDEX_FILE="/var/www/html/index.nginx-debian.html"
+CUSTOM_404_FILE="/usr/share/nginx/html/custom_404.html"
+
+# Define content
+INDEX_CONTENT="Hello World!"
+CUSTOM_404_CONTENT="Ceci n'est pas une page"
+X_SERVED_BY_HEADER="X-Served-By \"$HOSTNAME\""
+
+# Append configuration for Nginx
+NGINX_CONFIG_APPEND="
+    rewrite ^\/redirect_me https:\/\/github.com\/Tolulope05 permanent;
+
+    error_page 404 \/custom_404.html;
+    location = \/custom_404.html {
+        root \/usr\/share\/nginx\/html;
+        internal;
+    }
+"
+
+# Update Nginx default configuration file
+sed -i "s/server_name _;/server_name _;\n\t$NGINX_CONFIG_APPEND/" "$NGINX_DEFAULT_CONF"
+
+# Add custom header to Nginx main configuration
+sed -i "s/include \/etc\/nginx\/sites-enabled\/\*;/include \/etc\/nginx\/sites-enabled\/\*;\n\tadd_header $X_SERVED_BY_HEADER;/" "$NGINX_CONF"
+
+# Restart Nginx to apply changes
+service nginx restart
