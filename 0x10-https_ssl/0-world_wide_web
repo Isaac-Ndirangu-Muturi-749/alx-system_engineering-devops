@@ -3,29 +3,30 @@
 
 # Function to display information for a specific subdomain
 audit_subdomain() {
-    domain=$1
-    subdomain=$2
-    dig_output=$(dig $subdomain.$domain | grep -A1 'ANSWER SECTION:')
-    record_type=$(echo "$dig_output" | awk '/IN/ {print $4}')
-    destination=$(echo "$dig_output" | awk '/IN/ {print $5}')
+    domain="$1"
+    subdomain="$2"
+    dig_output=$(dig "$subdomain.$domain" | grep -A1 'ANSWER SECTION:')
+    output=$(echo "$dig_output" | tr '\t' '\n' | tail -2 | tr '\n' ' ')
+    record_type=$(echo "$output" | awk '{print $1}')
+    destination=$(echo "$output" | awk '{print $2}')
     echo "The subdomain $subdomain is a $record_type record and points to $destination"
 }
 
 # Function to display information for default subdomains
 audit_default_subdomains() {
-    domain=$1
-    audit_subdomain $domain www
-    audit_subdomain $domain lb-01
-    audit_subdomain $domain web-01
-    audit_subdomain $domain web-02
+    domain="$1"
+    audit_subdomain "$domain" www
+    audit_subdomain "$domain" lb-01
+    audit_subdomain "$domain" web-01
+    audit_subdomain "$domain" web-02
 }
 
 # Main script
-domain=$1
-subdomain=$2
+domain="$1"
+subdomain="$2"
 
 if [ -z "$subdomain" ]; then
-    audit_default_subdomains $domain
+    audit_default_subdomains "$domain"
 else
-    audit_subdomain $domain $subdomain
+    audit_subdomain "$domain" "$subdomain"
 fi
