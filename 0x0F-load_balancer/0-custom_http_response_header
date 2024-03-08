@@ -21,7 +21,7 @@ server {
    listen [::]:80 default_server;
 
    root /var/www/html;
-   index index.html;
+   index index.html index.htm index.nginx-debian.html;
 
    # Add custom header
    add_header X-Served-By \$hostname;
