@@ -1,0 +1,41 @@
+global
+    log /dev/log    local0
+    log /dev/log    local1 notice
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+defaults
+    log     global
+    mode    http
+    option  httplog
+    option  dontlognull
+    timeout connect 5000ms
+    timeout client  50000ms
+    timeout server  50000ms
+
+frontend www-http
+    bind   0.0.0.0:80
+    http-request set-header X-Forwarded-Proto http
+    default_backend www-backend
+
+frontend www-https                     # Define a frontend named www-https
+    bind 0.0.0.0:443 ssl crt /etc/haproxy/certs/www.inm-749.tech.pem   # Bind the frontend to listen on all available IPv4 addresses on port 443 (HTTPS) using SSL/TLS with the specified certificate file
+    http-request set-header X-Forwarded-Proto https   # Set the X-Forwarded-Proto header to https for incoming HTTP requests
+    acl letsencrypt-acl path_beg /.well-known/acme-challenge/   # Define an access control list (ACL) named letsencrypt-acl that matches requests with paths beginning with /.well-known/acme-challenge/
+    use_backend letsencrypt-backend if letsencrypt-acl   # Use the backend letsencrypt-backend for requests matching the letsencrypt-acl
+    default_backend www-backend   # Route requests to the backend www-backend by default
+
+
+backend www-backend           # Define a backend named www-backend
+    balance roundrobin        # Use round-robin load balancing algorithm
+    redirect scheme https if !{ ssl_fc }   # Redirect HTTP requests to HTTPS if they are not already encrypted
+    server web-01 100.27.4.237:80 check   # Define a server named 1733-web-01 with IP address 3.235.21.36 and port 80, and enable health checks
+    server web-02 54.146.94.67:80 check   # Define another server named 1733-web-02 with IP address 34.139.50.126 and port 80, and enable health checks
+
+
+backend letsencrypt-backend        # Define a backend named letsencrypt-backend
+    server letsencrypt 127.0.0.1:54321   # Define a server named letsencrypt with IP address 127.0.0.1 and port 54321
