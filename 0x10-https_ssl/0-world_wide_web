@@ -15,10 +15,10 @@ audit_subdomain() {
 # Function to display information for default subdomains
 audit_default_subdomains() {
     domain="$1"
-    audit_subdomain "$domain" www
-    audit_subdomain "$domain" lb-01
-    audit_subdomain "$domain" web-01
-    audit_subdomain "$domain" web-02
+    audit_subdomain "$domain" "www"
+    audit_subdomain "$domain" "lb-01"
+    audit_subdomain "$domain" "web-01"
+    audit_subdomain "$domain" "web-02"
 }
 
 # Main script
