@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Function to display information for a specific subdomain
+audit_subdomain() {
+    domain=$1
+    subdomain=$2
+    dig_output=$(dig $subdomain.$domain | grep -A1 'ANSWER SECTION:')
+    record_type=$(echo "$dig_output" | awk '/IN/ {print $4}')
+    destination=$(echo "$dig_output" | awk '/IN/ {print $5}')
+    echo "The subdomain $subdomain is a $record_type record and points to $destination"
+}
+
+# Function to display information for default subdomains
+audit_default_subdomains() {
+    domain=$1
+    audit_subdomain $domain www
+    audit_subdomain $domain lb-01
+    audit_subdomain $domain web-01
+    audit_subdomain $domain web-02
+}
+
+# Main script
+domain=$1
+subdomain=$2
+
+if [ -z "$subdomain" ]; then
+    audit_default_subdomains $domain
+else
+    audit_subdomain $domain $subdomain
+fi
