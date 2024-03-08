@@ -3,22 +3,33 @@
 # The name of the custom HTTP header must be X-Served-By
 # The value of the custom HTTP header must be the hostname of the server Nginx is running on
 
-sudo apt-get update
-# Install nginx and automatically answer "yes" to all prompts.
-sudo apt-get -y install nginx
+# Update package repository
+apt-get -y update
+
+# Install Nginx
+apt-get -y install nginx
+
+# Create index page
+echo "Hello World!" > /var/www/html/index.nginx-debian.html
+
+# Create custom 404 page
+echo "Ceci n'est pas une page" > /usr/share/nginx/html/custom_404.html
+
+# Backup original default configuration
+sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.original
+
+# Add redirect using sed
+sed -i "/server_name _;/a \\\trewrite ^\/redirect_me https:\/\/github.com\/Isaac-Ndirangu-Muturi-749 permanent;" /etc/nginx/sites-available/default
+
+# Add error redirection using sed
+sed -i "/server_name _;/a \\\terror_page 404 \/custom_404.html;" /etc/nginx/sites-available/default
+sed -i "/error_page 404 \/custom_404.html;/a \\\tlocation = \/custom_404.html {\n\t\troot \/usr\/share\/nginx\/html;\n\t\tinternal;\n\t}" /etc/nginx/sites-available/default
+
+# Backup original nginx configurationsudo apt install dos2unix
+sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.original
+
+# Add custom header using sed
+sed -i "s/include \/etc\/nginx\/sites-enabled\/\*;/include \/etc\/nginx\/sites-enabled\/\*;\n\tadd_header X-Served-By \"$HOSTNAME\";/" /etc/nginx/nginx.conf
+
+# Start Nginx service
 sudo service nginx start
-
-# Add a custom header to nginx configuration file to identify the server.
-sudo sed -i "11i\\\tadd_header X-Served-By $HOSTNAME;" /etc/nginx/nginx.conf
-# Explanation:
-# - `sudo`: Executes the command with superuser privileges.
-# - `sed`: Stream editor for filtering and transforming text.
-# - `-i`: Edit files in place.
-# - `"11i\\\tadd_header X-Served-By $HOSTNAME;"`: Inserts a new line before line 11 in the nginx configuration file.
-#   - `11i`: Insert before line 11.
-#   - `\\\t`: Inserts a tab character before the header.
-#   - `add_header X-Served-By $HOSTNAME;`: Adds the custom header with the server hostname.
-
-# Write "Hello World!" to the default nginx index file.
-echo "Hello World!" | sudo tee /usr/share/nginx/html/index.html
-sudo service nginx restart
