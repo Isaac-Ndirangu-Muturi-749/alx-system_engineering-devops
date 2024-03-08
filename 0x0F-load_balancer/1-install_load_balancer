@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 # Installs and sets up HAProxy
 
-set -e  # Exit immediately if a command exits with a non-zero status
-
 # Update package lists and upgrade installed packages
 sudo apt-get update
 sudo apt-get -y upgrade
@@ -18,6 +16,7 @@ sudo cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.original
 
 # Append configuration for the HAProxy load balancer
 sudo tee -a /etc/haproxy/haproxy.cfg > /dev/null <<EOF
+
 listen 339243-lb-01
     bind *:80
     mode http
@@ -26,6 +25,8 @@ listen 339243-lb-01
     option forwardfor
     server 339243-web-02 35.153.193.23:80 check
     server 339243-web-01 100.27.4.237:80 check
+    http-response add-header X-Served-By %[srv_name]
+
 EOF
 
 # Start HAProxy service
