@@ -1,40 +1,24 @@
 #!/usr/bin/env bash
-# a setup script for configuring Nginx with custom settings
+# Configure Nginx so that its HTTP response contains a custom header (on web-01 and web-02)
+# The name of the custom HTTP header must be X-Served-By
+# The value of the custom HTTP header must be the hostname of the server Nginx is running on
 
-# Update package repositories
-apt-get -y update
-# Install Nginx
-apt-get -y install nginx
-ufw allow 'Nginx HTTP'
+sudo apt-get update
+# Install nginx and automatically answer "yes" to all prompts.
+sudo apt-get -y install nginx
+sudo service nginx start
 
-# Define paths and content
-INDEX_FILE="/var/www/html/index.nginx-debian.html"
-CUSTOM_404_FILE="/usr/share/nginx/html/custom_404.html"
-NGINX_CONF="/etc/nginx/nginx.conf"
-NGINX_DEFAULT_CONF="/etc/nginx/sites-available/default"
-NGINX_SITES_ENABLED="/etc/nginx/sites-enabled"
+# Add a custom header to nginx configuration file to identify the server.
+sudo sed -i "11i\\\tadd_header X-Served-By $HOSTNAME;" /etc/nginx/nginx.conf
+# Explanation:
+# - `sudo`: Executes the command with superuser privileges.
+# - `sed`: Stream editor for filtering and transforming text.
+# - `-i`: Edit files in place.
+# - `"11i\\\tadd_header X-Served-By $HOSTNAME;"`: Inserts a new line before line 11 in the nginx configuration file.
+#   - `11i`: Insert before line 11.
+#   - `\\\t`: Inserts a tab character before the header.
+#   - `add_header X-Served-By $HOSTNAME;`: Adds the custom header with the server hostname.
 
-INDEX_CONTENT="Hello World!"
-CUSTOM_404_CONTENT="Ceci n'est pas une page"
-NGINX_CONFIG_APPEND="
-    rewrite ^\/redirect_me https:\/\/github.com\/Isaac-Ndirangu-Muturi-749 permanent;
-
-    error_page 404 \/custom_404.html;
-    location = \/custom_404.html {
-        root \/usr\/share\/nginx\/html;
-        internal;
-    }
-"
-
-# Create default index file
-echo "$INDEX_CONTENT" > "$INDEX_FILE"
-# Create custom 404 page
-echo "$CUSTOM_404_CONTENT" > "$CUSTOM_404_FILE"
-
-# Configure Nginx
-X_SERVED_BY_HEADER="X-Served-By \"$HOSTNAME\";"
-sed -i "/server_name _;/a $NGINX_CONFIG_APPEND" "$NGINX_DEFAULT_CONF"
-sed -i "s/include $NGINX_SITES_ENABLED\/\*;/include $NGINX_SITES_ENABLED\/\*;\n\tadd_header $X_SERVED_BY_HEADER/" "$NGINX_CONF"
-
-# Restart Nginx to apply changes
-service nginx restart
+# Write "Hello World!" to the default nginx index file.
+echo "Hello World!" | sudo tee /usr/share/nginx/html/index.html
+sudo service nginx restart
