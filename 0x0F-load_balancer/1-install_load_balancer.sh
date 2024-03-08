@@ -1,30 +1,26 @@
 #!/usr/bin/env bash
 # Installs and sets up HAProxy
 
-# Install HAProxy repository
-apt-get install -y software-properties-common
-add-apt-repository -y ppa:vbernat/haproxy-1.8
+sudo apt-get -y update
+sudo apt-get -y upgrade
+sudo apt-get -y install haproxy
 
-# Update package repositories
-apt-get -y update
+sudo sed -i 's/ENABLED=0/ENABLED=1/' /etc/default/haproxy
+sudo cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.original
 
-# Install HAProxy version 1.8
-apt-get install -y haproxy=1.8.*
+# Deletes everything from the first empty line to the end of file
+sudo sed -i '/^$/,$d' /etc/haproxy/haproxy.cfg
 
-# Enable HAProxy service
-echo "ENABLED=1" > /etc/default/haproxy
-
-# Configure HAProxy
-cat <<EOF >> /etc/haproxy/haproxy.cfg
-listen load_balancer
+# Appends to the file using a here document
+sudo tee -a /etc/haproxy/haproxy.cfg <<EOF
+listen 749-lb-01
     bind *:80
     mode http
     balance roundrobin
     option httpclose
     option forwardfor
-    server web1 44.200.83.158:80 check
-    server web2 3.237.16.226:80 check
+    server 749-web-02 54.146.94.67:80 check
+    server 749-web-01 100.27.4.237:80 check
 EOF
 
-# Start HAProxy service
-service haproxy start
+sudo service haproxy start
