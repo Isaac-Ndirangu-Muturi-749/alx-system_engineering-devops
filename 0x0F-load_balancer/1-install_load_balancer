@@ -40,8 +40,9 @@ frontend http_frontend
 
 backend http_backend
     balance roundrobin
-    server 339243-web-01 35.153.193.23:80 check
-    server 339243-web-02 54.146.94.67:80 check
+    server web-01 35.153.193.23:80 check
+    server web-02 54.146.94.67:80 check
+
 EOF
 
 # Restart or start HAProxy service if it's not already running
