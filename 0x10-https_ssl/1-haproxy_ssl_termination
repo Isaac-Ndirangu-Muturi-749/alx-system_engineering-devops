@@ -34,21 +34,19 @@ defaults
     errorfile 503 /etc/haproxy/errors/503.http
     errorfile 504 /etc/haproxy/errors/504.http
 
-# HTTP frontend for HTTP requests
+# Frontend configuration
 frontend www-http
     bind *:80
     mode http
-    http-request redirect scheme https code 301 unless { ssl_fc }
     http-request set-header X-Forwarded-Proto http
     default_backend www-backend
 
-# HTTPS frontend for SSL/TLS encrypted requests
 frontend www-https
     bind *:443 ssl crt /etc/haproxy/certs/www.inm-749.tech.pem
     http-request set-header X-Forwarded-Proto https
     default_backend www-backend
 
-# Backend for serving HTTP requests
+# Backend configuration
 backend www-backend
     balance roundrobin
     server 339243-web-01 35.153.193.23:80 check
