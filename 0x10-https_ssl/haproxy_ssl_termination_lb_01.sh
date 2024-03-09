@@ -72,7 +72,7 @@ defaults
 frontend www-http
     bind *:80
     mode http
-    http-request redirect scheme https code 301 unless { ssl_fc }
+    http-request redirect scheme https code 301 if !{ ssl_fc }
     http-request set-header X-Forwarded-Proto http
     default_backend www-backend
 
