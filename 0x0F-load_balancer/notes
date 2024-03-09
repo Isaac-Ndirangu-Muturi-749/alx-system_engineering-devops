@@ -174,3 +174,9 @@ server {
             internal;
         }
 }
+
+
+sudo apt-get purge -y haproxy
+curl -Is 127.0.0.1
+./transfer_file.sh 1-install_load_balancer 34.207.221.74
+sudo apt-get purge haproxy
