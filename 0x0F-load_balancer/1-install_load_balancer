@@ -31,6 +31,7 @@ defaults
     timeout connect  5000
     timeout client  10000
     timeout server  10000
+    timeout http-keep-alive 60000   # Set the timeout for keep-alive connections (60 seconds)
 
 listen 339243-lb-01
     bind 0.0.0.0:80
@@ -42,6 +43,7 @@ listen 339243-lb-01
     option forwardfor
     server 339243-web-01 35.153.193.23:80 check
     server 339243-web-02 54.146.94.67:80 check
+
 EOF
 
 # Restart HAProxy service to apply changes
