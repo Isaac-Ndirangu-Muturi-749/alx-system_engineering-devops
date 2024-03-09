@@ -180,3 +180,70 @@ sudo apt-get purge -y haproxy
 curl -Is 127.0.0.1
 ./transfer_file.sh 1-install_load_balancer 34.207.221.74
 sudo apt-get purge haproxy
+
+
+
+#!/usr/bin/env bash
+# Configure Nginx so that its HTTP response contains a custom header (on web-01 and web-02)
+
+# Update package list and install Nginx
+sudo apt-get -y update
+sudo apt-get -y purge nginx
+sudo apt-get -y install nginx
+
+mkdir -p /var/www/html
+# Create index page
+echo "Hello World!" > /var/www/html/index.nginx-debian.html
+
+# Create custom 404 page
+echo "Ceci n'est pas une page" > /usr/share/nginx/html/custom_404.html
+
+# Define variable for Nginx configuration file
+NGINX_CONF="/etc/nginx/sites-available/default"
+
+sudo tee -a "$NGINX_CONF" >/dev/null <<EOF
+# Default server configuration
+#
+http {
+    server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+
+        root /var/www/html;
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name _;
+
+        # Add custom header
+        add_header X-Served-By $hostname;
+
+        # Add redirect for /redirect_me
+        location /redirect_me {
+            return 301 https://github.com/Isaac-Ndirangu-Muturi-749;
+        }
+
+        # Add custom error page redirection
+        error_page 404 /custom_404.html;
+        location = /custom_404.html {
+            root /usr/share/nginx/html;
+            internal;
+        }
+    }
+}
+
+EOF
+
+# Testing configurations for syntax errors
+sudo nginx -t -c /etc/nginx/sites-available/default
+
+# Restart or start HAProxy service
+if [ "$(pgrep -c nginx)" -le 0 ]; then
+	sudo service nginx start
+else
+	sudo service nginx restart
+fi
+
+
+ ./transfer_file.sh 0-custom_http_response_header 35.153.193.23
+
+curl -sI 127.0.0.1 | grep X-Served-By
