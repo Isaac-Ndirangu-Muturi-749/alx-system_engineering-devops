@@ -247,3 +247,12 @@ fi
  ./transfer_file.sh 0-custom_http_response_header 35.153.193.23
 
 curl -sI 127.0.0.1 | grep X-Served-By
+
+# Restart or start HAProxy service
+if [ "$(pgrep -c haproxy)" -le 0 ]; then
+	sudo service haproxy start
+else
+	sudo service haproxy restart
+fi
+
+./transfer_file.sh 1-install_load_balancer 34.207.221.74
