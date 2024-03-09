@@ -4,6 +4,7 @@
 # Update package list and install Nginx
 sudo apt-get -y update
 sudo apt-get -y install nginx
+sudo service nginx start
 
 # Create index page
 echo "Hello World!" > /var/www/html/index.nginx-debian.html
@@ -42,4 +43,4 @@ server {
 EOF
 
 # Start Nginx service
-sudo service nginx start
+sudo service nginx restart
