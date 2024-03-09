@@ -256,3 +256,8 @@ else
 fi
 
 ./transfer_file.sh 1-install_load_balancer 34.207.221.74
+
+
+curl -sI 35.153.193.23 | grep X-Served-By
+
+
