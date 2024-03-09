@@ -13,11 +13,7 @@ global
 ca-base /etc/ssl/certs
 crt-base /etc/ssl/private
 
-# Default ciphers to use on SSL-enabled listening sockets.
-# For more information, see ciphers(1SSL). This list is from:
-#  https://hynek.me/articles/hardening-your-web-servers-ssl-ciphers/
-# An alternative list with additional directives can be obtained from
-#  https://mozilla.github.io/server-side-tls/ssl-config-generator/?server=haproxy
+# Default ciphers to use on SSL-enabled listening sockets
 ssl-default-bind-ciphers ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS
 ssl-default-bind-options no-sslv3
 
@@ -40,25 +36,20 @@ defaults
 
 # HTTP frontend for HTTP requests
 frontend www-http
-    bind 0.0.0.0:80
+    bind *:80
+    mode http
+    http-request redirect scheme https code 301 unless { ssl_fc }
     http-request set-header X-Forwarded-Proto http
     default_backend www-backend
 
 # HTTPS frontend for SSL/TLS encrypted requests
 frontend www-https
-    bind 0.0.0.0:443 ssl crt /etc/haproxy/certs/www.inm-749.tech.pem
+    bind *:443 ssl crt /etc/haproxy/certs/www.inm-749.tech.pem
     http-request set-header X-Forwarded-Proto https
-    acl letsencrypt-acl path_beg /.well-known/acme-challenge/
-    use_backend letsencrypt-backend if letsencrypt-acl
     default_backend www-backend
 
 # Backend for serving HTTP requests
 backend www-backend
     balance roundrobin
-    redirect scheme https if !{ ssl_fc }
-    server web-01 35.153.193.23:80 check
-    server web-02 54.146.94.67:80 check
-
-# Backend for handling LetsEncrypt ACME challenges
-backend letsencrypt-backend
-    server letsencrypt 127.0.0.1:54321
+    server 339243-web-01 35.153.193.23:80 check
+    server 339243-web-02 54.146.94.67:80 check
