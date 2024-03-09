@@ -9,8 +9,10 @@ sudo apt-get update
 # Install HAProxy
 sudo apt-get install -y haproxy
 
+# Create a backup
+sudo mv /etc/default/haproxy{,.original}
 # Enable HAProxy to be started by init script
-echo "ENABLED=1" | sudo dd status=none of=/etc/default/haproxy
+echo "ENABLED=1" | sudo tee -a /etc/default/haproxy >/dev/null
 
 # Create a backup of the original haproxy.cfg file
 sudo mv /etc/haproxy/haproxy.cfg{,.original}
@@ -18,13 +20,6 @@ sudo mv /etc/haproxy/haproxy.cfg{,.original}
 # Define server configuration
 DOMAIN="inm-749.tech"
 SERVER_CONFIG="
-defaults
-    mode http
-    timeout client 15s
-    timeout connect 10s
-    timeout server 15s
-    timeout http-request 10s
-
 frontend $DOMAIN-frontend
     bind *:80
     default_backend $DOMAIN-backend
@@ -36,7 +31,7 @@ backend $DOMAIN-backend
 "
 
 # Apply server configuration
-echo "$SERVER_CONFIG" | sudo dd status=none of=/etc/haproxy/haproxy.cfg
+echo "$SERVER_CONFIG" | sudo tee -a /etc/haproxy/haproxy.cfg >/dev/null
 
 # Restart or start HAProxy service
 if [ "$(pgrep -c haproxy)" -le 0 ]; then
