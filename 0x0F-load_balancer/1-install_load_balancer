@@ -6,13 +6,12 @@ set -euo pipefail
 # Update package repositories
 sudo apt-get update
 
+sudo apt-get purge -y haproxy
 # Install HAProxy
 sudo apt-get install -y haproxy
 
-# Create a backup
-sudo mv /etc/default/haproxy{,.original}
 # Enable HAProxy to be started by init script
-echo "ENABLED=1" | sudo tee -a /etc/default/haproxy >/dev/null
+sudo sh -c 'echo "ENABLED=1" >> /etc/default/haproxy'
 
 # Create a backup of the original haproxy.cfg file
 sudo mv /etc/haproxy/haproxy.cfg{,.original}
