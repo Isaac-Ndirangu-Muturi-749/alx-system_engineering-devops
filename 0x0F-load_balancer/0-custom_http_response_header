@@ -6,6 +6,7 @@ sudo apt-get -y update
 sudo apt-get -y install nginx
 sudo service nginx start
 
+mkdir -p /var/www/html
 # Create index page
 echo "Hello World!" > /var/www/html/index.nginx-debian.html
 
