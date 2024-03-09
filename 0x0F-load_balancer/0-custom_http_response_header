@@ -43,5 +43,8 @@ server {
 
 EOF
 
+# Testing configurations for syntax errors
+sudo nginx -t
+
 # Start Nginx service
 sudo service nginx restart
