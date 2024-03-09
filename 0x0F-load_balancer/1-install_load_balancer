@@ -1,52 +1,46 @@
 #!/usr/bin/env bash
 # Installs and sets up HAProxy
 
+set -euo pipefail
+
+# Update package repositories
 sudo apt-get update
-sudo apt-get -y install haproxy
 
-# Start HAProxy service
-sudo service haproxy start
+# Install HAProxy
+sudo apt-get install -y haproxy
 
-# Enable HAProxy by modifying the configuration file
-sudo sed -i 's/ENABLED=0/ENABLED=1/' /etc/default/haproxy
+# Enable HAProxy to be started by init script
+echo "ENABLED=1" | sudo dd status=none of=/etc/default/haproxy
 
 # Create a backup of the original haproxy.cfg file
 sudo mv /etc/haproxy/haproxy.cfg{,.original}
 
-# Create a new haproxy.cfg file with the desired configuration
-sudo tee /etc/haproxy/haproxy.cfg >/dev/null <<EOF
-global
-    log 127.0.0.1 local0 notice
-    maxconn 2000
-    user haproxy
-    group haproxy
-
+# Define server configuration
+DOMAIN="inm-749.tech"
+SERVER_CONFIG="
 defaults
-    log     global
-    mode    http
-    option  httplog
-    option  dontlognull
-    retries 3
-    option redispatch
-    timeout connect  5000
-    timeout client  10000
-    timeout server  10000
-    timeout http-keep-alive 60000   # Set the timeout for keep-alive connections (60 seconds)
-
-listen 339243-lb-01
-    bind 0.0.0.0:80
     mode http
-    stats enable
-    stats uri /haproxy?stats
+    timeout client 15s
+    timeout connect 10s
+    timeout server 15s
+    timeout http-request 10s
+
+frontend $DOMAIN-frontend
+    bind *:80
+    default_backend $DOMAIN-backend
+
+backend $DOMAIN-backend
     balance roundrobin
-    option httpclose
-    option forwardfor
     server 339243-web-01 35.153.193.23:80 check
     server 339243-web-02 54.146.94.67:80 check
+"
 
-EOF
+# Apply server configuration
+echo "$SERVER_CONFIG" | sudo dd status=none of=/etc/haproxy/haproxy.cfg
 
-# Restart HAProxy service to apply changes
-sudo service haproxy restart
-
-echo "HAProxy setup completed successfully."
+# Restart or start HAProxy service
+if [ "$(pgrep -c haproxy)" -le 0 ]; then
+	sudo service haproxy start
+else
+	sudo service haproxy restart
+fi
