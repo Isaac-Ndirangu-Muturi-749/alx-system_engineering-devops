@@ -2,7 +2,6 @@
 #  Install and configure HAproxy on the lb-01 server
 
 # Purge existing HAProxy installation and related directories
-service haproxy stop
 sudo apt-get purge -y haproxy
 sudo rm -rf /var/lib/haproxy/dev/
 sudo apt -y autoremove
@@ -34,4 +33,3 @@ echo "ENABLED=1" | sudo tee /etc/default/haproxy
 
 # Restart HAProxy
 service haproxy restart
-service haproxy status
