@@ -11,82 +11,74 @@ sudo apt-get -y install certbot
 # Stop HAProxy service temporarily
 sudo service haproxy stop
 
+# Define domain
+DOMAIN='www.inm-749.tech'
+
 # Obtain SSL certificate using Certbot standalone mode
-sudo certbot certonly --standalone --preferred-challenges http --http-01-port 80 -d www.inm-749.com
+sudo certbot certonly --standalone --preferred-challenges http --http-01-port 80 -d "$DOMAIN"
 
-# List the contents of the directory where Let's Encrypt stores the certificates for the domain www.inm-749.tech
-sudo ls /etc/letsencrypt/live/www.inm-749.tech
+# Define certificate folder
+CERT_FOLDER="/etc/letsencrypt/live/$DOMAIN"
 
-# Create a directory to store the HAProxy certificates if it doesn't exist already
-sudo mkdir -p /etc/haproxy/certs
+# List contents of the Let's Encrypt certificate directory
+sudo ls "$CERT_FOLDER"
 
 # Concatenate fullchain.pem and privkey.pem into a single certificate file
-DOMAIN='www.inm-749.com' sudo -E bash -c '
-    cat /etc/letsencrypt/live/$DOMAIN/fullchain.pem \
-    /etc/letsencrypt/live/$DOMAIN/privkey.pem \
-    > /etc/haproxy/certs/$DOMAIN.pem
-'
+sudo bash -c "cat '$CERT_FOLDER/fullchain.pem' '$CERT_FOLDER/privkey.pem' > '$CERT_FOLDER/$DOMAIN.pem'"
 
-# Restrict permissions for certificate files
-sudo chmod -R go-rwx /etc/haproxy/certs
 
 # Configure HAProxy
 sudo tee /etc/haproxy/haproxy.cfg > /dev/null <<EOF
-# Global settings
 global
-    log /dev/log local0
-    log /dev/log local1 notice
-    chroot /var/lib/haproxy
-    stats socket /run/haproxy/admin.sock mode 660 level admin
-    stats timeout 30s
-    user haproxy
-    group haproxy
-    daemon
+        log /dev/log    local0
+        log /dev/log    local1 notice
+        chroot /var/lib/haproxy
+        stats socket /run/haproxy/admin.sock mode 660 level admin
+        stats timeout 30s
+        user haproxy
+        group haproxy
+        daemon
 
-# Default SSL material locations
-ca-base /etc/ssl/certs
-crt-base /etc/ssl/private
+        # Default SSL material locations
+        ca-base /etc/ssl/certs
+        crt-base /etc/ssl/private
 
-# Default ciphers to use on SSL-enabled listening sockets
-ssl-default-bind-ciphers ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS
-ssl-default-bind-options no-sslv3
+        # See: https://ssl-config.mozilla.org/#server=haproxy&server-version=2.0.3&config=intermediate
+        ssl-default-bind-ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
+        ssl-default-bind-ciphersuites TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256
+        ssl-default-bind-options ssl-min-ver TLSv1.2 no-tls-tickets
 
-# Default server configuration
 defaults
-    log     global
-    mode    http
-    option  httplog
-    option  dontlognull
-    timeout connect 5000
-    timeout client  50000
-    timeout server  50000
-    errorfile 400 /etc/haproxy/errors/400.http
-    errorfile 403 /etc/haproxy/errors/403.http
-    errorfile 408 /etc/haproxy/errors/408.http
-    errorfile 500 /etc/haproxy/errors/500.http
-    errorfile 502 /etc/haproxy/errors/502.http
-    errorfile 503 /etc/haproxy/errors/503.http
-    errorfile 504 /etc/haproxy/errors/504.http
+        log     global
+        mode    http
+        option  httplog
+        option  dontlognull
+        timeout connect 5000
+        timeout client  50000
+        timeout server  50000
+        errorfile 400 /etc/haproxy/errors/400.http
+        errorfile 403 /etc/haproxy/errors/403.http
+        errorfile 408 /etc/haproxy/errors/408.http
+        errorfile 500 /etc/haproxy/errors/500.http
+        errorfile 502 /etc/haproxy/errors/502.http
+        errorfile 503 /etc/haproxy/errors/503.http
+        errorfile 504 /etc/haproxy/errors/504.http
 
-# HTTP frontend for HTTP requests
 frontend www-http
-    bind *:80
-    mode http
-    http-request redirect scheme https code 301 if !{ ssl_fc }
-    http-request set-header X-Forwarded-Proto http
-    default_backend www-backend
+        bind *:80
+        http-request add-header X-Forwarded-Proto http
+        default_backend web-backend
+        redirect scheme https if !{ ssl_fc }
 
-# HTTPS frontend for SSL/TLS encrypted requests
 frontend www-https
-    bind *:443 ssl crt /etc/haproxy/certs/www.inm-749.tech.pem
-    http-request set-header X-Forwarded-Proto https
-    default_backend www-backend
+        bind *:443 ssl crt /etc/letsencrypt/live/www.inm-749.tech/www.inm-749.tech.pem
+        http-request add-header X-Forwarded-Proto https
+        default_backend web-backend
 
-# Backend for serving HTTP requests
-backend www-backend
-    balance roundrobin
-    server 339243-web-01 35.153.193.23:80 check
-    server 339243-web-02 54.146.94.67:80 check
+backend web-backend
+        balance roundrobin
+        server 339243-web-01 35.153.193.23:80 check
+        server 339243-web-02 54.146.94.67:80 check
 
 EOF
 
@@ -94,4 +86,6 @@ EOF
 sudo service haproxy start
 
 # Verify HAProxy configuration
-curl -sI localhost
+curl -sI 127.0.0.1
+
+sudo service haproxy status
