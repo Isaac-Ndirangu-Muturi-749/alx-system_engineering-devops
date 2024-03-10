@@ -1,57 +1,58 @@
 #!/usr/bin/env bash
-# Installs and sets up HAProxy
+# script for configuring HAProxy load balancer server
 
-# Purge existing HAProxy installation and related directories
-sudo apt-get purge -y haproxy
-sudo rm -rf /etc/haproxy
-sudo rm -rf /var/lib/haproxy
-sudo apt -y autoremove
-
-# Update package list and install HAproxy
-sudo apt-get update
-sudo apt-get install -y haproxy
-
-# Create a backup of the original haproxy.cfg file
-sudo mv /etc/haproxy/haproxy.cfg{,.original}
-
-# Configure HAproxy
-sudo tee /etc/haproxy/haproxy.cfg > /dev/null <<EOF
-global
-    log 127.0.0.1 local0 notice
-    maxconn 2000
-    user haproxy
-    group haproxy
-
-defaults
-    log     global
-    mode    http
-    option  httplog
-    option  dontlognull
-    retries 3
-    option redispatch
-    timeout connect  5000
-    timeout client  10000
-    timeout server  10000
-
+MY_ID=339243
+CONFIG_FILE=/etc/haproxy/haproxy.cfg
+INPUT_LINE="
 frontend http_frontend
     bind *:80
     mode http
+    maxconn 100000
     default_backend http_backend
 
 backend http_backend
     balance roundrobin
-    server 339243-web-01 35.153.193.23:80 check
-    server 339243-web-02 54.146.94.67:80 check
+    option forwardfor # ensure forwarded request includes client ip
+    server 339243-web-01 35.153.193.23
+    server 339243-web-02 54.146.94.67
+    # server 339243-web-01 35.153.193.23:80 check
+    # server 339243-web-02 54.146.94.67:80 check
+"
 
-EOF
-
-# Restart or start HAProxy service if it's not already running
-if ! pgrep haproxy > /dev/null; then
-    sudo service haproxy start
+# check if hostname is correct
+if [[ $(hostname) =~ ^$MY_ID-lb-[0-9]+ ]]; then
+    echo 'hostname properly configured'
 else
-    sudo service haproxy restart
+    >&2 echo 'hostname not configured properly...'
+    >&2 echo 'please set hostname to pattern: 339243-lb-<server_id>...'
+    >&2 echo 'Example: sudo hostnamectl set-hostname 339243-lb-<insert_server_id_here>'
 fi
 
-# Ensure HAProxy is started on boot
-# Make sure that HAproxy can be managed via an init script
-echo "ENABLED=1" | sudo tee -a /etc/default/haproxy
+# check if HAProxy was previously configured
+if [ "$(grep -o "$INPUT_LINE" $CONFIG_FILE | wc -l)" != 0 ]; then
+	echo 'HAProxy already configured to script specs :)...'
+	# restart HAProxy
+	sudo service haproxy restart
+else
+    # Purge existing HAProxy installation and related directories
+    sudo apt-get purge -y haproxy
+    sudo rm -rf /etc/haproxy
+    sudo rm -rf /var/lib/haproxy
+    sudo apt -y autoremove
+
+	# install HAProxy Version 2.4
+	sudo apt-get -y install software-properties-common
+    sudo add-apt-repository -y ppa:vbernat/haproxy-2.4
+    sudo apt update
+	sudo apt-get -y update
+    apt-cache policy haproxy
+	sudo apt-get -y install haproxy=2.4.\*
+    sudo update-rc.d haproxy enable
+
+	# configure HAProxyd
+
+	sudo printf "%s" "$INPUT_LINE" >> $CONFIG_FILE
+
+	# start HAProxy
+	sudo service haproxy start
+fi
