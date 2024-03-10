@@ -261,3 +261,4 @@ fi
 curl -sI 35.153.193.23 | grep X-Served-By
 
 
+sudo rm -rf /var/lib/haproxy/dev/

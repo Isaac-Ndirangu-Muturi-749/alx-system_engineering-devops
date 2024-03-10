@@ -1,58 +1,37 @@
 #!/usr/bin/env bash
-# script for configuring HAProxy load balancer server
+#  Install and configure HAproxy on the lb-01 server
 
-MY_ID=339243
-CONFIG_FILE=/etc/haproxy/haproxy.cfg
-INPUT_LINE="
-frontend http_frontend
+# Purge existing HAProxy installation and related directories
+service haproxy stop
+sudo apt-get purge -y haproxy
+sudo rm -rf /var/lib/haproxy/dev/
+sudo apt -y autoremove
+
+# Installation of ubuntu-focal HAProxy
+apt-get -y update
+apt-get install --no-install-recommends software-properties-common
+add-apt-repository -y ppa:vbernat/haproxy-2.8
+apt-get install -y haproxy=2.8.\*
+
+# Configure HAProxy to share resources between two servers
+FILEPATH="/etc/haproxy/haproxy.cfg"
+CONTENT="
+frontend http
     bind *:80
     mode http
-    maxconn 100000
-    default_backend http_backend
+    default_backend web-backend
 
-backend http_backend
+backend web-backend
     balance roundrobin
-    option forwardfor # ensure forwarded request includes client ip
-    server 339243-web-01 35.153.193.23
-    server 339243-web-02 54.146.94.67
-    # server 339243-web-01 35.153.193.23:80 check
-    # server 339243-web-02 54.146.94.67:80 check
-"
+    server 339243-web-01 35.153.193.23:80 check
+    server 339243-web-02 54.146.94.67:80 check"
 
-# check if hostname is correct
-if [[ $(hostname) =~ ^$MY_ID-lb-[0-9]+ ]]; then
-    echo 'hostname properly configured'
-else
-    >&2 echo 'hostname not configured properly...'
-    >&2 echo 'please set hostname to pattern: 339243-lb-<server_id>...'
-    >&2 echo 'Example: sudo hostnamectl set-hostname 339243-lb-<insert_server_id_here>'
-fi
 
-# check if HAProxy was previously configured
-if [ "$(grep -o "$INPUT_LINE" $CONFIG_FILE | wc -l)" != 0 ]; then
-	echo 'HAProxy already configured to script specs :)...'
-	# restart HAProxy
-	sudo service haproxy restart
-else
-    # Purge existing HAProxy installation and related directories
-    sudo apt-get purge -y haproxy
-    sudo rm -rf /etc/haproxy
-    sudo rm -rf /var/lib/haproxy
-    sudo apt -y autoremove
+echo "$CONTENT" | sudo tee -a "$FILEPATH"
 
-	# install HAProxy Version 2.4
-	sudo apt-get -y install software-properties-common
-    sudo add-apt-repository -y ppa:vbernat/haproxy-2.4
-    sudo apt update
-	sudo apt-get -y update
-    apt-cache policy haproxy
-	sudo apt-get -y install haproxy=2.4.\*
-    sudo update-rc.d haproxy enable
+# Enable HAProxy to be started with init script
+echo "ENABLED=1" | sudo tee /etc/default/haproxy
 
-	# configure HAProxyd
-
-	sudo printf "%s" "$INPUT_LINE" >> $CONFIG_FILE
-
-	# start HAProxy
-	sudo service haproxy start
-fi
+# Restart HAProxy
+service haproxy restart
+service haproxy status

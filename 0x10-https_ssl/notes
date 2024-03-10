@@ -1,2 +1,4 @@
 nslookup www.inm-749.com
 
+eval "$(ssh-agent -s)"
+
