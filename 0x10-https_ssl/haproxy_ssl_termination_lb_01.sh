@@ -68,7 +68,7 @@ frontend www-http
         bind *:80
         http-request add-header X-Forwarded-Proto http
         default_backend web-backend
-        redirect scheme https if !{ ssl_fc }
+        redirect scheme https code 301 if !{ ssl_fc }
 
 frontend www-https
         bind *:443 ssl crt /etc/letsencrypt/live/www.inm-749.tech/www.inm-749.tech.pem
