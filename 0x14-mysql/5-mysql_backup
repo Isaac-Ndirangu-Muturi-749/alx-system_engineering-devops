@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Bash script that generates a MySQL dump and creates a compressed archive out of it.
+
+dump_file="backup.sql"
+
+# MySQL dump all databases
+mysqldump -u root -p"$1" --all-databases > "$dump_file"
+
+# Check if the MySQL dump was successful
+if [ $? -ne 0 ]; then
+    echo "MySQL dump failed. Exiting."
+    exit 1
+fi
+
+# Compress the MySQL dump to a tar.gz archive
+backup_date=$(date +"%d-%m-%Y")
+backup_archive="$backup_date.tar.gz"
+tar -czf "$backup_archive" "$dump_file"
+
+# Check if the compression was successful
+if [ $? -ne 0 ]; then
+    echo "Compression failed. Exiting."
+    exit 1
+fi
+
+echo "Backup completed successfully."
