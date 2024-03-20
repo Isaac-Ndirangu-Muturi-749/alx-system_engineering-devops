@@ -92,3 +92,6 @@ SHOW SLAVE STATUS\G;
 scp ubuntu@web-01.inm-749.tech:/etc/mysql/mysql.conf.d/mysqld.cnf 4-mysql_configuration_primary
 
 scp ubuntu@web-02.inm-749.tech:/etc/mysql/mysql.conf.d/mysqld.cnf 4-mysql_configuration_replica
+
+
+scp 5-mysql_backup ubuntu@web-01.inm-749.tech:~/
