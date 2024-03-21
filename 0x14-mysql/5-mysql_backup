@@ -4,7 +4,7 @@
 dump_file="backup.sql"
 
 # MySQL dump all databases
-mysqldump -u root -p"$1" --all-databases > "$dump_file"
+mysqldump -uroot -p"$1" --all-databases > "$dump_file"
 
 # Check if the MySQL dump was successful
 if [ $? -ne 0 ]; then
