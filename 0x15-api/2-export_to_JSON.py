@@ -1,9 +1,3 @@
-#!/usr/bin/python3
-"""
-Python script that, using this REST API, for a given employee ID,
-exports information about his/her TODO list progress to a json file.
-"""
-
 import json
 import requests
 import sys
@@ -18,18 +12,12 @@ if __name__ == '__main__':
 
     username = user_result.get("username")
 
-    for todo in todo_result:
-
-        task_title = todo.get("title")
-
     json_data = {employee_id: []}
     for task in todo_result:
-        task_completed_status = ("True" if task.get("completed")
-                                 else "False")
 
         json_data[employee_id].append({
             "task": task["title"],
-            "completed": task_completed_status,
+            "completed": task.get("completed"),
             "username": username
         })
 
