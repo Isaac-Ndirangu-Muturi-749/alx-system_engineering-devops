@@ -16,14 +16,25 @@ if __name__ == '__main__':
     todo_result = requests.get(todo_url).json()
     user_result = requests.get(user_url).json()
 
-    username = user_result.get("name")
+    username = user_result.get("username")
 
-    user_tasks = ([{"task": todo.get("title"),
-                    "completed": todo.get("completed"),
-                    "username": username}
-                   for todo in todo_result
-                   ])
+    for todo in todo_result:
+
+        task_title = todo.get("title")
+
+    json_data = {employee_id: []}
+    for task in todo_result:
+        task_completed_status = ("True" if task.get("completed")
+                                 else "False")
+
+        json_data[employee_id].append({
+            "task": task["title"],
+            "completed": task_completed_status,
+            "username": username
+        })
 
     filename = f"{employee_id}.json"
-    with open(filename, "w") as json_file:
-        json.dump({employee_id: user_tasks}, json_file)
+    with open(filename, "w") as file:
+        json.dump(json_data, file)
+
+    print(f"Tasks for user {employee_id} have been exported to {filename}")
