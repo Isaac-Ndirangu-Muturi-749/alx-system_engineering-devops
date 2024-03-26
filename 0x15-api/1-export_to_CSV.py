@@ -21,8 +21,8 @@ if __name__ == '__main__':
 
     with open(filename, mode='w', newline='') as file:
         writer = csv.writer(file, quoting=csv.QUOTE_ALL)
-        writer.writerow(
-            ["USER_ID", "USERNAME", "TASK_COMPLETED_STATUS", "TASK_TITLE"])
+        # writer.writerow(
+        #     ["USER_ID", "USERNAME", "TASK_COMPLETED_STATUS", "TASK_TITLE"])
         for todo in todo_result:
             task_completed_status = ("True" if todo.get("completed")
                                      else "False")
