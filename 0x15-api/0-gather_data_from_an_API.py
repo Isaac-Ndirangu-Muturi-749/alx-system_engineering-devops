@@ -34,6 +34,7 @@ if __name__ == "__main__":
         print("Error retrieving TODO data:", e)
         sys.exit(1)
 
-    print("Employee {} is done with tasks({}/{}):".format(username, num_done_tasks, total_tasks))
+    print("Employee {} is done with tasks({}/{}):".format(
+        username, num_done_tasks, total_tasks))
     for task in done_tasks:
         print("\t ", task.get("title"))
