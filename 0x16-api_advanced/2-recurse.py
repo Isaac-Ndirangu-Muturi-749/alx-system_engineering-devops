@@ -6,6 +6,7 @@ of all hot articles for a given subreddit.
 
 import requests
 
+
 def recurse(subreddit, hot_list=[], after=None):
     url = f"https://www.reddit.com/r/{subreddit}/hot.json?limit=100"
     headers = {'User-Agent': 'Mozilla/5.0'}
@@ -29,6 +30,7 @@ def recurse(subreddit, hot_list=[], after=None):
         recurse(subreddit, hot_list, after)
 
     return hot_list
+
 
 if __name__ == "__main__":
     subreddit = input("Enter subreddit name: ")
