@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
 # Kill gunicorn worker processe gracefully, with no downtime
 
-# Get the PID of the Gunicorn master process
-MASTER_PID=$(ps aux | grep '[g]unicorn' | awk '{print $2}')
-# Send a graceful reload signal to the master process
-kill -s HUP $MASTER_PID
+pkill -HUP gunicorn
