@@ -2,6 +2,7 @@
 # Kill gunicorn worker processe gracefully, with no downtime
 
 # Find the PID of the top process listed in the output of ps auxf | grep gunicorn
+# shellcheck disable=SC2009
 gunicorn_pid=$(ps auxf | grep gunicorn | head -n 1 | awk '{print $2}')
 
 # Send a HUP signal to the top process PID to reload gracefully
