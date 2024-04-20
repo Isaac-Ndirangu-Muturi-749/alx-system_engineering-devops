@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 # Kill gunicorn worker processe gracefully, with no downtime
 
-kill -HUP "$(ps -C gunicorn fch -o pid | head -n 1)"
+# Find the PID of the top process listed in the output of ps auxf | grep gunicorn
+gunicorn_pid=$(ps auxf | grep gunicorn | head -n 1 | awk '{print $2}')
+
+# Send a HUP signal to the top process PID to reload gracefully
+kill -HUP "$gunicorn_pid"
