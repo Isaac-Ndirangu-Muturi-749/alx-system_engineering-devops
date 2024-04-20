@@ -34,12 +34,12 @@ server {
 		alias /data/web_static/current;
 	}
 
-	# Set proxy server to serve from AirBnB_clone_v2 to a gunicorn instance
+	# Set proxy server to serve from AirBnB_clone_v2 to a gunicorn instances
 	location /airbnb-onepage/ {
 		proxy_pass http://localhost:5000/airbnb-onepage/;
 	}
 
-	location ~ /airbnb-dynamic/number_odd_or_even/(\d+)$ {
-		proxy_pass http://localhost:5001/number_odd_or_even/$1;
-	}
+    location ~ /airbnb-dynamic/number_odd_or_even/(\d+)$ {
+        proxy_pass http://127.0.0.1:5001/number_odd_or_even/$1;
+    }
 }
