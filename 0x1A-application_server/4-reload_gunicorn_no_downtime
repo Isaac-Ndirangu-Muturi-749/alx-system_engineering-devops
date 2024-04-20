@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 # Kill gunicorn worker processe gracefully, with no downtime
 
-pkill -HUP gunicorn
+kill -HUP `ps -C gunicorn fch -o pid | head -n 1`
