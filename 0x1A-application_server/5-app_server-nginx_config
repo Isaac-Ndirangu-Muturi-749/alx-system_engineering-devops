@@ -30,7 +30,7 @@ server {
 	}
 
 	# Set proxy server to serve from AirBnB_clone_v2 to a gunicorn instances
-	location /airbnb-onepage/ {
+	location /airbnb-onepage {
 		proxy_pass http://localhost:5000/airbnb-onepage/;
 	}
 
@@ -39,7 +39,7 @@ server {
 	}
 
 	# proxying requests for /api/v1/[route] to port 5002
-		location /api {
+	location /api {
 		proxy_pass http://127.0.0.1:5002/api;
 	}
 
@@ -50,6 +50,7 @@ server {
 
 	# Serve static content for AirBnB_clone_v4
 	location /static {
-		alias ~/AirBnB_clone_v4/web_dynamic/static/;
+		alias /home/ubuntu/AirBnB_clone_v4/web_dynamic/static/;
+		autoindex on;
 	}
 }
